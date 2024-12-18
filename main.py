@@ -44,13 +44,16 @@ def tridiagonal_solve(a, b, c, d):
     beta[0] = d[0] / b[0]
     alpha[0] = -c[0] / b[0]
 
-    for i in range(1, n):
+    for i in range(1, n - 1):
         tmp = b[i] + a[i] * alpha[i - 1]
         alpha[i] = -c[i] / tmp
         beta[i] = (d[i] - a[i] * beta[i - 1]) / tmp
 
+    tmp = b[-1] + a[-1] * alpha[-2]
+    beta[-1] = (d[-1] - a[-1] * beta[-2]) / tmp
+
     # Обратный ход
-    x[n - 1] = beta[n - 1]
+    x[-1] = beta[-1]
     for i in range(n - 2, -1, -1):
         x[i] = alpha[i] * x[i + 1] + beta[i]
 
@@ -64,7 +67,11 @@ def scheme(u, r):
     a[0] = 0
     c[-1] = 0
     c[0] = 0.0 
-    next = tridiagonal_solve(a, b, c, u)
+
+    d = u.copy()
+    d[-1] = u[-2]
+
+    next = tridiagonal_solve(a, b, c, d)
     return next
 
 r_array = [0.25, 0.5, 1, 1.25]
@@ -80,18 +87,18 @@ for r, tay in zip(r_array, tay_array):
         u = init(x)
         iters = int(time_point / tay)
         for i in range(iters):
-            u = godunov_scheme(u, r)
-            # u = scheme(u, r)
+            # u = godunov_scheme(u, r)
+            u = scheme(u, r)
         plt.plot(x, u, label=f'Численное решение (t={time_point})')
 
     plt.plot(x, find_solution(x, 1), 'b--', label=f'Точное решение (t=1)')
     plt.plot(x, find_solution(x, 5), 'r--', label=f'Точное решение (t=5)')
     
-    plt.title(f'Схема Годунова (r = {r})')
-    # plt.title(f'Неявная разностная схема (r = {r})')
+    # plt.title(f'Схема Годунова (r = {r})')
+    plt.title(f'Неявная разностная схема (r = {r})')
     plt.xlabel('x')
     plt.ylabel('u(x, t)')
-    # plt.ylim(-10, 10)
+    plt.ylim(0, 6)
     plt.legend()
     plt.grid()
     plt.show()
