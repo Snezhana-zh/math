@@ -66,12 +66,10 @@ def scheme(u, r):
     c = np.full(n, r/2)
     a[0] = 0
     c[-1] = 0
-    c[0] = 0.0 
+    c[0] = 0
+    a[-1] = 0
 
-    d = u.copy()
-    d[-1] = u[-2]
-
-    next = tridiagonal_solve(a, b, c, d)
+    next = tridiagonal_solve(a, b, c, u)
     return next
 
 r_array = [0.25, 0.5, 1, 1.25]
